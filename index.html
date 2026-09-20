@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NDA COMMAND</title><link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<section id="splash" class="screen splash">
+  <div class="splash-bg"></div>
+  <div class="splash-content">
+    <div class="brand">NDA COMMAND</div>
+    <img src="assets/nda-hero.jpg" class="hero-img" alt="NDA">
+    <div class="eyebrow">NATIONAL DEFENCE ACADEMY • PREPARATION SYSTEM</div>
+    <h1>DISCIPLINE.<br><span>PREPARATION.</span><br>PRECISION.</h1>
+    <p>Train your mind before the examination trains you.</p>
+    <button id="enterBtn" class="primary big">ENTER COMMAND →</button>
+  </div>
+</section>
+
+<section id="auth" class="screen auth hidden">
+  <div class="auth-visual"><div class="auth-copy">
+    <div class="brand">NDA COMMAND</div>
+    <div class="eyebrow">YOUR PERSONAL NDA PREPARATION SYSTEM</div>
+    <h2>One command center.<br>Every part of your preparation.</h2>
+    <p>01 — Structured Study Library</p><p>02 — Practice + PYQs + Mock Tests</p>
+    <p>03 — Mistake Book + Revision</p><p>04 — Personal Analytics</p>
+  </div></div>
+  <div class="auth-panel">
+    <div class="brand">NDA <b>COMMAND</b></div>
+    <div class="role-switch"><button class="role active" data-role="student">STUDENT</button><button class="role" data-role="admin">ADMIN</button></div>
+
+    <form id="loginForm" class="auth-form">
+      <div><div class="eyebrow">SECURE ACCESS</div><h1 id="authTitle">Student Login</h1><p id="authSub">Continue your preparation.</p></div>
+      <label>Email<input id="loginEmail" type="email" required placeholder="you@example.com"></label>
+      <label>Password<input id="loginPassword" type="password" required placeholder="••••••••"></label>
+      <button class="primary full" type="submit">LOGIN <span>→</span></button>
+      <button id="forgotBtn" type="button" class="link-btn">Forgot password?</button>
+    </form>
+
+    <form id="registerForm" class="auth-form hidden">
+      <div><div class="eyebrow">NEW RECRUIT</div><h1>Student Registration</h1><p>Create your preparation account.</p></div>
+      <label>Full name<input id="regName" required></label>
+      <label>Email<input id="regEmail" type="email" required></label>
+      <label>Password<input id="regPassword" type="password" minlength="6" required></label>
+      <label>Confirm password<input id="regConfirm" type="password" minlength="6" required></label>
+      <button class="primary full" type="submit">CREATE ACCOUNT <span>→</span></button>
+    </form>
+    <div id="authToggle" class="auth-toggle">New student? <button type="button">Create account</button></div>
+    <div id="authMsg" class="auth-msg"></div>
+    <div class="demo">Demo student: student@nda.local / student123<br>Demo admin: admin@nda.local / admin123</div>
+  </div>
+</section>
+
+<div id="app" class="hidden">
+  <aside id="sidebar">
+    <div class="side-top"><div class="side-brand"><b>N</b><span>NDA <strong>COMMAND</strong><small id="sideRole">STUDENT</small></span></div><button id="closeMenu" class="icon">×</button></div>
+    <nav id="nav"></nav>
+    <div class="side-bottom">
+      <div class="mini-user"><b id="avatar">S</b><span><strong id="sideName">Student</strong><small id="sideEmail"></small></span></div>
+      <button id="logoutBtn" class="logout">↪ LOG OUT</button>
+    </div>
+  </aside>
+  <div id="backdrop"></div>
+  <main>
+    <header><button id="menuBtn" class="icon menu-btn">☰</button><div><small id="pageKicker">COMMAND CENTER</small><b id="pageTitle">Dashboard</b></div>
+      <div class="top-actions"><button id="searchBtn" class="icon">⌕</button><button id="profileBtn" class="profile"><span id="topAvatar">S</span><span id="topName">Student</span></button></div>
+    </header>
+    <section id="content"></section>
+  </main>
+</div>
+<div id="toast"></div>
+<script src="js/data.js"></script><script src="js/app.js"></script>
+</body></html>
