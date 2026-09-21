@@ -7,3 +7,27 @@
 @media(max-width:1050px){.auth{grid-template-columns:1fr}.auth-visual{display:none}.g4{grid-template-columns:repeat(2,1fr)}.adminGrid{grid-template-columns:1fr}}
 @media(max-width:800px){#sidebar{transform:translateX(-105%);transition:.2s;box-shadow:20px 0 50px #0008}#sidebar.open{transform:none}.side-top .icon{display:block}main{margin-left:0}header{padding:0 15px}header>.menu-btn{display:block}#backdrop.show{display:block;position:fixed;inset:0;background:#0009;z-index:20}#content{padding:18px 13px}.g3,.g2{grid-template-columns:1fr}.formGrid{grid-template-columns:1fr}.head{flex-direction:column;align-items:flex-start;gap:10px}.profile span:last-child{display:none}.heroCard h1{font-size:29px}}
 @media(max-width:500px){.g4{grid-template-columns:1fr 1fr}.auth-panel{padding:25px 18px}.splash h1{font-size:42px}}
+.auth-panel{
+  position:relative;
+}
+
+.auth-close{
+  position:absolute;
+  right:22px;
+  top:18px;
+  width:36px;
+  height:36px;
+  border:1px solid var(--line);
+  background:#0b1510;
+  color:#fff;
+  border-radius:8px;
+  font-size:24px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.auth-close:hover{
+  background:#16251a;
+}
