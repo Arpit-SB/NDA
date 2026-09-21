@@ -18,12 +18,68 @@ function btn(text,action,cls="ghost"){return `<button class="${cls}" data-action
 function splash(){show("splash");$("#enterBtn").onclick=()=>showAuth()}
 function show(id){["splash","auth","app"].forEach(x=>$("#"+x).classList.add("hidden"));$("#"+id).classList.remove("hidden")}
 function showAuth(){show("auth");setRole("student")}
-function setRole(r){S.role=r;document.querySelectorAll(".role").forEach(x=>x.classList.toggle("active",x.dataset.role===r));$("#authTitle").textContent=r==="admin"?"Admin Login":"Student Login";$("#authSub").textContent=r==="admin"?"Command administrator access.":"Continue your preparation.";$("#authToggle").classList.toggle("hidden",r!=="student");$("#authMsg").textContent=""}
+function showRegister(){
+  $("#loginForm").classList.add("hidden");
+  $("#registerForm").classList.remove("hidden");
+  $("#authToggle").classList.add("hidden");
+  $("#registerBack").classList.remove("hidden");
+  $("#authMsg").textContent="";
+}
+
+function showLogin(){
+  $("#registerForm").classList.add("hidden");
+  $("#loginForm").classList.remove("hidden");
+  $("#authToggle").classList.remove("hidden");
+  $("#registerBack").classList.add("hidden");
+  $("#authMsg").textContent="";
+}
+
+function setRole(r){
+  S.role=r;
+
+  document.querySelectorAll(".role")
+    .forEach(x=>x.classList.toggle("active",x.dataset.role===r));
+
+  $("#authTitle").textContent=
+    r==="admin" ? "Admin Login" : "Student Login";
+
+  $("#authSub").textContent=
+    r==="admin"
+      ? "Command administrator access."
+      : "Continue your preparation.";
+
+  $("#authToggle").classList.toggle("hidden",r!=="student");
+
+  $("#authMsg").textContent="";
+
+  showLogin();
+}
 function setupAuth(){
-$("#enterBtn").onclick=showAuth;document.querySelectorAll(".role").forEach(x=>x.onclick=()=>setRole(x.dataset.role));
-$("#authToggle button").onclick=()=>{$("#loginForm").classList.add("hidden");$("#registerForm").classList.remove("hidden")};
-$("#loginForm").onsubmit=e=>{e.preventDefault();login()};$("#registerForm").onsubmit=e=>{e.preventDefault();register()};
-$("#forgotBtn").onclick=()=>toast("Connect Supabase Auth for real password reset.")}
+  $("#enterBtn").onclick=showAuth;
+
+  document.querySelectorAll(".role")
+    .forEach(x=>x.onclick=()=>setRole(x.dataset.role));
+
+  $("#authToggle button").onclick=showRegister;
+
+  $("#registerBack button").onclick=showLogin;
+
+  $("#closeRegister").onclick=showLogin;
+
+  $("#loginForm").onsubmit=e=>{
+    e.preventDefault();
+    login();
+  };
+
+  $("#registerForm").onsubmit=e=>{
+    e.preventDefault();
+    register();
+  };
+
+  $("#forgotBtn").onclick=()=>{
+    toast("Connect Supabase Auth for real password reset.");
+  };
+}
 function login(){let e=$("#loginEmail").value.trim().toLowerCase(),p=$("#loginPassword").value,u=S.users.find(x=>x.email.toLowerCase()===e&&x.password===p&&x.role===S.role);if(!u){$("#authMsg").textContent="Invalid credentials or wrong access type.";return}S.user=u;S.page=u.role==="admin"?"admin":"home";show("app");render();toast("Welcome, "+u.name)}
 function register(){let n=$("#regName").value.trim(),e=$("#regEmail").value.trim().toLowerCase(),p=$("#regPassword").value,c=$("#regConfirm").value;if(p!==c){$("#authMsg").textContent="Passwords do not match.";return}if(S.users.some(x=>x.email===e)){$("#authMsg").textContent="Email already registered.";return}let u={id:"u"+Date.now(),name:n,email:e,password:p,role:"student"};S.users.push(u);S.user=u;save();show("app");render();toast("Account created")}
 function logout(){S.user=null;show("splash")}
