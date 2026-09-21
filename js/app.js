@@ -107,7 +107,21 @@ function home(){let avg=Math.round(S.db.chapters.reduce((a,x)=>a+x.progress,0)/S
 function study(){return head("Study Library","KNOWLEDGE BASE")+`<div class="grid g4">${S.db.subjects.map(s=>`<div class="card chapter"><span class="badge">${s.code}</span><h3>${s.icon} ${s.name}</h3><p class="muted">${s.desc}</p>${btn("OPEN","subject:"+s.id)}</div>`).join("")}</div><div class="section"><h2>Resources</h2></div><div class="grid g3"><div class="card"><h3>Video Lectures</h3><p class="muted">Admin-published lectures.</p>${btn("BROWSE","resources:lectures")}</div><div class="card"><h3>Notes & Formula</h3><p class="muted">Revision material.</p>${btn("BROWSE","resources:notes")}</div><div class="card"><h3>Books / PDFs</h3><p class="muted">Admin-published PDFs.</p>${btn("BROWSE","resources:books")}</div></div>`}
 function subjectPage(id){let s=S.db.subjects.find(x=>x.id===id),cs=S.db.chapters.filter(x=>x.subject===id);return head(s.name,"STUDY • CHAPTERS",btn("← BACK","study"))+`<div class="grid g3">${cs.map(c=>`<div class="card chapter"><span class="badge">${c.items} ITEMS</span><h3>${c.name}</h3><p class="muted">Lectures • Notes • Practice • PYQs • Test</p><div class="progress"><i style="width:${c.progress}%"></i></div>${btn("OPEN","chapter:"+c.id)}</div>`).join("")||`<div class="empty">No chapters published.</div>`}</div>`}
 function resources(type){let a=S.db[type].filter(x=>x.published);return head(type==="lectures"?"Lecture Library":type==="notes"?"Notes Library":"Book Library","RESOURCE LIBRARY",btn("← STUDY","study"))+`<div class="grid g3">${a.map(x=>`<div class="card"><span class="badge">${esc(x.type||x.subject)}</span><h3>${esc(x.title)}</h3><p class="muted">${esc(x.subject||"")} ${x.duration?"• "+x.duration:""}</p><a class="primary" href="${esc(x.url||"#")}" target="_blank">OPEN →</a></div>`).join("")||`<div class="empty">Nothing published yet.</div>`}</div>`}
-function practice(){return head("Practice","QUESTION BANK")+`<div class="grid g3">${S.db.questions.map(q=>`<div class="card"><span class="badge">${subject(q.subject)}</span><h3>${chapter(q.chapter)}</h3><p class="question">${esc(q.q)}</p>${btn("SOLVE","question:"+q.id)}</div>`).join("")}</div>`}
+function practice(){
+  return head("Practice","QUESTION BANK")+
+  `<div class="grid g3">
+    ${S.db.questions
+      .filter(q=>q.published!==false)
+      .map(q=>`
+        <div class="card">
+          <span class="badge">${subject(q.subject)}</span>
+          <h3>${chapter(q.chapter)}</h3>
+          <p class="question">${esc(q.q)}</p>
+          ${btn("SOLVE","question:"+q.id)}
+        </div>
+      `).join("")}
+  </div>`;
+}
 function questionPage(id){let q=S.db.questions.find(x=>x.id===id);return head("Practice Question","QUESTION BANK",btn("← PRACTICE","practice"))+`<div class="card"><span class="badge">${subject(q.subject)}</span><p class="question">${esc(q.q)}</p><div id="opts">${q.opts.map((o,i)=>`<label class="answer"><input type="radio" name="ans" value="${i}"> ${String.fromCharCode(65+i)}. ${esc(o)}</label>`).join("")}</div>${btn("CHECK ANSWER","check:"+id,"primary")}<div id="result"></div></div>`}
 function tests(){return head("Test Centre","TEST ENGINE")+`<div class="grid g3">${S.db.tests.map(t=>`<div class="card"><span class="badge">${t.type}</span><h3>${esc(t.name)}</h3><p class="muted">${t.questions.length} questions • ${t.duration} min</p>${btn("START TEST","test:"+t.id,"primary")}</div>`).join("")}</div>`}
 function testPage(id){let t=S.db.tests.find(x=>x.id===id),qs=t.questions.map(id=>S.db.questions.find(q=>q.id===id)).filter(Boolean);S.test={t,qs};return head(t.name,"LIVE TEST",`<span class="badge">${t.duration} MIN</span>`)+`<div class="card">${qs.map((q,i)=>`<div style="margin-bottom:25px"><div class="eyebrow">QUESTION ${i+1}</div><p class="question">${esc(q.q)}</p>${q.opts.map((o,j)=>`<label class="answer"><input type="radio" name="t${i}" value="${j}"> ${String.fromCharCode(65+j)}. ${esc(o)}</label>`).join("")}</div>`).join("")}${btn("SUBMIT TEST","submit","primary")}</div>`}
@@ -119,8 +133,108 @@ function ssb(){return head("SSB Preparation","OFFICER-LIKE QUALITIES")+`<div cla
 function profile(){return head("Profile","ACCOUNT")+`<div class="grid g2"><div class="card"><div class="eyebrow">IDENTITY</div><h2>${esc(S.user.name)}</h2><p class="muted">${esc(S.user.email)}</p><span class="badge">${S.user.role.toUpperCase()}</span></div><div class="card"><div class="eyebrow">SECURITY</div><p class="muted">This demo stores credentials locally. Use Supabase Auth before deploying publicly.</p>${btn("LOG OUT","logout")}</div></div>`}
 
 function admin(){return head("Admin Dashboard","COMMAND ADMINISTRATION",btn("UPLOAD CONTENT","admin-content","primary"))+`<div class="grid g4"><div class="card stat"><div class="label">STUDENTS</div><div class="value">${S.users.filter(x=>x.role==="student").length}</div></div><div class="card stat"><div class="label">LECTURES</div><div class="value">${S.db.lectures.length}</div></div><div class="card stat"><div class="label">QUESTIONS</div><div class="value">${S.db.questions.length}</div></div><div class="card stat"><div class="label">TESTS</div><div class="value">${S.db.tests.length}</div></div></div><div class="section"><h2>Admin Controls</h2></div><div class="grid g3"><div class="card"><h3>Upload Content</h3><p class="muted">Lecture, notes, books, tests, questions and current affairs.</p>${btn("OPEN","admin-content")}</div><div class="card"><h3>Students</h3><p class="muted">View registered students.</p>${btn("VIEW","admin-users")}</div><div class="card"><h3>Publish System</h3><p class="muted">Published resources become visible to students.</p></div></div>`}
-function adminUsers(){return head("Students","ADMIN • REGISTERED USERS")+`<div class="card tableWrap"><table><tr><th>NAME</th><th>EMAIL</th><th>ROLE</th></tr>${S.users.filter(x=>x.role==="student").map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.email)}</td><td>STUDENT</td></tr>`).join("")}</table></div>`}
-function adminContent(){return head("Upload & Manage","ADMIN • CONTENT CONTROL")+`<div class="adminGrid"><div class="tabs">${["lecture","note","book","test","question","current"].map(x=>`<button class="tab ${S.adminType===x?"active":""}" data-type="${x}">${x.toUpperCase()}</button>`).join("")}</div><div class="card">${adminForm()}</div></div><div class="section"><h2>Published Resources</h2></div><div class="card tableWrap"><table><tr><th>TYPE</th><th>TITLE</th><th>STATUS</th></tr>${[...S.db.lectures.map(x=>["LECTURE",x]),...S.db.notes.map(x=>["NOTE",x]),...S.db.books.map(x=>["BOOK",x])].map(([t,x])=>`<tr><td>${t}</td><td>${esc(x.title)}</td><td>${x.published?"PUBLISHED":"HIDDEN"}</td></tr>`).join("")}</table></div>`}
+function adminUsers(){
+  return head("Students","ADMIN • REGISTERED USERS")+
+  `<div class="card tableWrap">
+    <table>
+      <tr>
+        <th>NAME</th>
+        <th>EMAIL</th>
+        <th>ROLE</th>
+        <th>ACTION</th>
+      </tr>
+
+      ${S.users.filter(x=>x.role==="student").map(x=>`
+        <tr>
+          <td>${esc(x.name)}</td>
+          <td>${esc(x.email)}</td>
+          <td>STUDENT</td>
+          <td>
+            ${btn("REMOVE","remove-student:"+x.id,"danger")}
+          </td>
+        </tr>
+      `).join("") || `
+        <tr>
+          <td colspan="4">No students registered.</td>
+        </tr>
+      `}
+    </table>
+  </div>`;
+}
+function adminContent(){
+  return head("Upload & Manage","ADMIN • CONTENT CONTROL")+
+
+  `<div class="adminGrid">
+    <div class="tabs">
+      ${["lecture","note","book","test","question","current"]
+        .map(x=>`
+          <button class="tab ${S.adminType===x?"active":""}" data-type="${x}">
+            ${x.toUpperCase()}
+          </button>
+        `).join("")}
+    </div>
+
+    <div class="card">
+      ${adminForm()}
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Published Content</h2>
+  </div>
+
+  <div class="card tableWrap">
+    <table>
+      <tr>
+        <th>TYPE</th>
+        <th>TITLE</th>
+        <th>STATUS</th>
+        <th>ACTION</th>
+      </tr>
+
+      ${[
+        ...S.db.lectures.map(x=>["LECTURE",x,x.title]),
+        ...S.db.notes.map(x=>["NOTE",x,x.title]),
+        ...S.db.books.map(x=>["BOOK",x,x.title]),
+        ...S.db.questions.map(x=>["QUESTION",x,x.q])
+      ].map(([type,item,title])=>`
+
+        <tr>
+          <td>${type}</td>
+
+          <td>${esc(title)}</td>
+
+          <td>
+            ${item.published===false
+              ? "UNPUBLISHED"
+              : "PUBLISHED"}
+          </td>
+
+          <td>
+            ${
+              item.published===false
+              ? btn(
+                  "PUBLISH",
+                  "toggle-publish:"+type+":"+item.id,
+                  "success"
+                )
+              : btn(
+                  "UNPUBLISH",
+                  "toggle-publish:"+type+":"+item.id,
+                  "danger"
+                )
+            }
+          </td>
+        </tr>
+
+      `).join("") || `
+        <tr>
+          <td colspan="4">No content available.</td>
+        </tr>
+      `}
+    </table>
+  </div>`;
+}
 function field(id,label,placeholder,type="text"){return `<label class="field">${label}<input id="${id}" type="${type}" placeholder="${placeholder}"></label>`}
 function adminForm(){let t=S.adminType;
 if(t==="lecture")return `<div class="formGrid">${field("fTitle","Lecture title","Mechanics — Newton's Laws")}${field("fSubject","Subject","Physics")}${field("fChapter","Chapter","Mechanics")}${field("fUrl","Video URL","https://...")}<div class="wide upload"><label>Lecture file<input id="fFile" type="file" accept="video/*"></label></div><div class="wide">${btn("PUBLISH LECTURE","publish:lecture","primary")}</div></div>`;
@@ -137,24 +251,83 @@ if(a.startsWith("chapter:")){go("practice");return}
 if(a.startsWith("resources:")){$("#content").innerHTML=resources(a.split(":")[1]);bind();return}
 if(a.startsWith("question:")){$("#content").innerHTML=questionPage(a.split(":")[1]);bind();return}
 if(a.startsWith("test:")){$("#content").innerHTML=testPage(a.split(":")[1]);bind();return}
-if(a.startsWith("check:")) {
-    check(a.split(":")[1]);
+if(a.startsWith("check:")){
+  check(a.split(":")[1]);
+  return;
 }
 if(a==="submit")submitTest();
 if(a==="add-task"){let x=prompt("Task name?");if(x){S.tasks.unshift({title:x,done:false});save();render()}}
 if(a==="logout")logout();
+if(a.startsWith("remove-student:")){
+  removeStudent(a.split(":")[1]);
+  return;
+}
+
+if(a.startsWith("toggle-publish:")){
+  togglePublish(a.split(":"));
+  return;
+}
 if(a.startsWith("publish:"))publish(a.split(":")[1]);
 if(a.startsWith("ssb:"))toast(a.split(":")[1]+" module selected");
 }
 function check(id){let q=S.db.questions.find(x=>x.id===id),v=document.querySelector('input[name="ans"]:checked'),box=$("#result");if(!v){box.innerHTML='<p class="wrong">Select an option.</p>';return}let ok=+v.value===q.ans;if(!ok&&!S.mistakes.includes(id))S.mistakes.push(id),save();box.innerHTML=`<div class="answer ${ok?"correct":"wrong"}"><b>${ok?"CORRECT":"INCORRECT"}</b><p>${esc(q.exp)}</p></div>`}
+function removeStudent(id){
+  const u=S.users.find(x=>x.id===id);
+
+  if(!u)return;
+
+  if(!confirm("Remove student "+u.name+"?"))return;
+
+  S.users=S.users.filter(x=>x.id!==id);
+
+  save();
+  render();
+
+  toast("Student removed");
+}
 function submitTest(){let t=S.test,score=0;t.qs.forEach((q,i)=>{let x=document.querySelector(`input[name="t${i}"]:checked`);if(x&&+x.value===q.ans)score++;else if(x&&!S.mistakes.includes(q.id))S.mistakes.push(q.id)});S.results.unshift({test:t.t.name,score,total:t.qs.length,date:new Date().toISOString()});save();S.page="analytics";render();toast("Test submitted")}
 function publish(t){
 let id=t+"_"+Date.now(),v=id=>$("#"+id).value;
 if(t==="lecture")S.db.lectures.push({id,title:v("fTitle"),subject:v("fSubject"),chapter:v("fChapter"),duration:"Uploaded",url:v("fUrl")||"#",published:true});
 else if(t==="note"||t==="book")S.db[t==="note"?"notes":"books"].push({id,title:v("fTitle"),subject:v("fSubject"),type:v("fType"),url:v("fUrl")||"#",published:true});
 else if(t==="test")S.db.tests.push({id,name:v("fTitle"),type:"Admin Test",duration:+v("fDuration")||60,questions:v("fQuestions").split(",").map(x=>x.trim()).filter(Boolean)});
-else if(t==="question")S.db.questions.push({id,q:v("fTitle"),subject:v("fSubject"),chapter:v("fChapter"),opts:v("fOptions").split(",").map(x=>x.trim()),ans:+v("fAnswer")||0,exp:v("fExp")});
+else if(t==="question")S.db.questions.push({
+  id,
+  q:v("fTitle"),
+  subject:v("fSubject"),
+  chapter:v("fChapter"),
+  opts:v("fOptions").split(",").map(x=>x.trim()),
+  ans:+v("fAnswer")||0,
+  exp:v("fExp"),
+  published:true
+});
 else S.db.currentAffairs.unshift({id,date:v("fDate")||new Date().toISOString().slice(0,10),cat:v("fSubject"),title:v("fTitle"),text:v("fText")});
 save();render();toast("Published. Students can now see it.")}
 function search(){let q=prompt("Search NDA Command");if(!q)return;let s=q.toLowerCase(),hits=[...S.db.chapters.map(x=>x.name),...S.db.lectures.map(x=>x.title),...S.db.notes.map(x=>x.title),...S.db.books.map(x=>x.title)].filter(x=>x.toLowerCase().includes(s));alert(hits.length?hits.join("\n"):"No results")}
 document.addEventListener("DOMContentLoaded",()=>{setupAuth();setupShell();if(S.user){show("app");render()}else splash()})
+function togglePublish(parts){
+  const type=parts[1];
+  const id=parts[2];
+
+  const map={
+    LECTURE:"lectures",
+    NOTE:"notes",
+    BOOK:"books",
+    QUESTION:"questions"
+  };
+
+  const arr=S.db[map[type]];
+
+  if(!arr)return;
+
+  const item=arr.find(x=>x.id===id);
+
+  if(!item)return;
+
+  item.published=item.published===false;
+
+  save();
+  render();
+
+  toast(item.published ? "Published" : "Unpublished");
+}
