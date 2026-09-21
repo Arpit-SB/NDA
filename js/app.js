@@ -81,8 +81,9 @@ if(a.startsWith("chapter:")){go("practice");return}
 if(a.startsWith("resources:")){$("#content").innerHTML=resources(a.split(":")[1]);bind();return}
 if(a.startsWith("question:")){$("#content").innerHTML=questionPage(a.split(":")[1]);bind();return}
 if(a.startsWith("test:")){$("#content").innerHTML=testPage(a.split(":")[1]);bind();return}
-if(a==="check:"+a.split(":")[1])return;
-if(a.startsWith("check:"))check(a.split(":")[1]);
+if(a.startsWith("check:")) {
+    check(a.split(":")[1]);
+}
 if(a==="submit")submitTest();
 if(a==="add-task"){let x=prompt("Task name?");if(x){S.tasks.unshift({title:x,done:false});save();render()}}
 if(a==="logout")logout();
