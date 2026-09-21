@@ -31,3 +31,24 @@
 .auth-close:hover{
   background:#16251a;
 }
+.danger{
+  background:#1a0d0d;
+  border:1px solid #673b3b;
+  color:#e9aaaa;
+  padding:9px 12px;
+  border-radius:8px;
+  font-weight:800;
+  font-size:10px;
+  cursor:pointer;
+}
+
+.success{
+  background:#102014;
+  border:1px solid #49634c;
+  color:#b7d5b0;
+  padding:9px 12px;
+  border-radius:8px;
+  font-weight:800;
+  font-size:10px;
+  cursor:pointer;
+}
