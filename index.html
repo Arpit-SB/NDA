@@ -38,6 +38,8 @@
     </form>
 
     <form id="registerForm" class="auth-form hidden">
+      <button id="closeRegister" type="button" class="auth-close" aria-label="Back to login">×</button>
+
       <div><div class="eyebrow">NEW RECRUIT</div><h1>Student Registration</h1><p>Create your preparation account.</p></div>
       <label>Full name<input id="regName" required></label>
       <label>Email<input id="regEmail" type="email" required></label>
@@ -46,6 +48,7 @@
       <button class="primary full" type="submit">CREATE ACCOUNT <span>→</span></button>
     </form>
     <div id="authToggle" class="auth-toggle">New student? <button type="button">Create account</button></div>
+    <div id="registerBack" class="auth-toggle hidden">Already registered? <button type="button">Login</button></div>
     <div id="authMsg" class="auth-msg"></div>
     <div class="demo">Demo student: student@nda.local / student123<br>Demo admin: admin@nda.local / admin123</div>
   </div>
