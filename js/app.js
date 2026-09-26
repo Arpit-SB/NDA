@@ -136,13 +136,15 @@ async function login(){
   }
 
   S.user = profile;
-  S.role = profile.role;
+S.role = profile.role;
 
-  save();
+// Open correct dashboard after login
+S.page = profile.role === "admin" ? "admin" : "home";
 
-  render();
+save();
+render();
 
-  toast("Welcome back, " + profile.name);
+toast("Welcome back, " + profile.name);
 }
 async function register(){
 
