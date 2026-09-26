@@ -32,7 +32,7 @@
     <form id="loginForm" class="auth-form">
       <div><div class="eyebrow">SECURE ACCESS</div><h1 id="authTitle">Student Login</h1><p id="authSub">Continue your preparation.</p></div>
       <label>Email<input id="loginEmail" type="email" required placeholder="you@example.com"></label>
-      <label>Password<input id="loginPassword" type="password" required placeholder="••••••••"></label>
+      <label>Password<span class="password-wrap"><input id="loginPassword" type="password" required placeholder="••••••••"><button type="button" class="password-toggle" data-target="loginPassword" aria-label="Show password">👁</button></span></label>
       <button class="primary full" type="submit">LOGIN <span>→</span></button>
       <button id="forgotBtn" type="button" class="link-btn">Forgot password?</button>
     </form>
@@ -43,9 +43,8 @@
       <div><div class="eyebrow">NEW RECRUIT</div><h1>Student Registration</h1><p>Create your preparation account.</p></div>
       <label>Full name<input id="regName" required></label>
       <label>Email<input id="regEmail" type="email" required></label>
-      <label>Password<input id="regPassword" type="password" minlength="6" required></label>
-      <label>Confirm password<input id="regConfirm" type="password" minlength="6" required></label>
-      <button class="primary full" type="submit">CREATE ACCOUNT <span>→</span></button>
+      <label>Password<span class="password-wrap"><input id="regPassword" type="password" minlength="6" required><button type="button" class="password-toggle" data-target="regPassword" aria-label="Show password">👁</button></span></label>
+      <label>Confirm password<span class="password-wrap"><input id="regConfirm" type="password" minlength="6" required><button type="button" class="password-toggle" data-target="regConfirm" aria-label="Show password">👁</button></span></label><button class="primary full" type="submit">CREATE ACCOUNT <span>→</span></button>
     </form>
     <div id="authToggle" class="auth-toggle">New student? <button type="button">Create account</button></div>
     <div id="registerBack" class="auth-toggle hidden">Already registered? <button type="button">Login</button></div>
