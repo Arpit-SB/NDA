@@ -76,12 +76,119 @@ function setupAuth(){
     register();
   };
 
-  $("#forgotBtn").onclick=()=>{
-    toast("Connect Supabase Auth for real password reset.");
-  };
+  $("#forgotBtn").onclick = forgotPassword;
 }
-function login(){let e=$("#loginEmail").value.trim().toLowerCase(),p=$("#loginPassword").value,u=S.users.find(x=>x.email.toLowerCase()===e&&x.password===p&&x.role===S.role);if(!u){$("#authMsg").textContent="Invalid credentials or wrong access type.";return}S.user=u;S.page=u.role==="admin"?"admin":"home";show("app");render();toast("Welcome, "+u.name)}
-function register(){let n=$("#regName").value.trim(),e=$("#regEmail").value.trim().toLowerCase(),p=$("#regPassword").value,c=$("#regConfirm").value;if(p!==c){$("#authMsg").textContent="Passwords do not match.";return}if(S.users.some(x=>x.email===e)){$("#authMsg").textContent="Email already registered.";return}let u={id:"u"+Date.now(),name:n,email:e,password:p,role:"student"};S.users.push(u);S.user=u;save();show("app");render();toast("Account created")}
+async function forgotPassword(){
+
+  const email = prompt("Enter your registered email:");
+
+  if(!email) return;
+
+  const { error } =
+    await supabaseClient.auth.resetPasswordForEmail(
+      email,
+      {
+        redirectTo:
+          window.location.origin +
+          window.location.pathname +
+          "?reset=true"
+      }
+    );
+
+  if(error){
+    toast(error.message);
+    return;
+  }
+
+  toast("Password reset link sent to your email.");
+}
+async function login(){
+
+  const email = $("#loginEmail").value.trim();
+  const password = $("#loginPassword").value;
+
+  if(!email || !password){
+    toast("Enter email and password");
+    return;
+  }
+
+  const { data, error } =
+    await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
+
+  if(error){
+    toast(error.message);
+    return;
+  }
+
+  const { data: profile } =
+    await supabaseClient
+      .from("profiles")
+      .select("*")
+      .eq("id", data.user.id)
+      .single();
+
+  if(!profile){
+    toast("Profile not found");
+    return;
+  }
+
+  S.user = profile;
+  S.role = profile.role;
+
+  save();
+
+  render();
+
+  toast("Welcome back, " + profile.name);
+}
+async function register(){
+
+  const name = $("#regName").value.trim();
+  const email = $("#regEmail").value.trim();
+  const password = $("#regPassword").value;
+
+  if(!name || !email || !password){
+    toast("Fill all fields");
+    return;
+  }
+
+  const { data, error } =
+    await supabaseClient.auth.signUp({
+      email,
+      password
+    });
+
+  if(error){
+    toast(error.message);
+    return;
+  }
+
+  if(!data.user){
+    toast("Check your email to verify your account.");
+    return;
+  }
+
+  const { error: profileError } =
+    await supabaseClient
+      .from("profiles")
+      .insert({
+        id:data.user.id,
+        name:name,
+        role:"student"
+      });
+
+  if(profileError){
+    toast(profileError.message);
+    return;
+  }
+
+  toast("Account created successfully.");
+
+  showLogin();
+}
 function logout(){S.user=null;show("splash")}
 
 function nav(){
