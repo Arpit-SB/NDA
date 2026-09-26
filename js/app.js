@@ -421,6 +421,21 @@ else S.db.currentAffairs.unshift({id,date:v("fDate")||new Date().toISOString().s
 save();render();toast("Published. Students can now see it.")}
 function search(){let q=prompt("Search NDA Command");if(!q)return;let s=q.toLowerCase(),hits=[...S.db.chapters.map(x=>x.name),...S.db.lectures.map(x=>x.title),...S.db.notes.map(x=>x.title),...S.db.books.map(x=>x.title)].filter(x=>x.toLowerCase().includes(s));alert(hits.length?hits.join("\n"):"No results")}
 document.addEventListener("DOMContentLoaded",()=>{setupAuth();setupShell();if(S.user){show("app");render()}else splash()})
+document.querySelectorAll(".password-toggle").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const input = document.getElementById(btn.dataset.target);
+
+    if (input.type === "password") {
+      input.type = "text";
+      btn.textContent = "🙈";
+      btn.setAttribute("aria-label", "Hide password");
+    } else {
+      input.type = "password";
+      btn.textContent = "👁";
+      btn.setAttribute("aria-label", "Show password");
+    }
+  });
+});
 function togglePublish(parts){
   const type=parts[1];
   const id=parts[2];
