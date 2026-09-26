@@ -138,13 +138,17 @@ async function login(){
   S.user = profile;
   S.role = profile.role;
 
-// Open the main app
+  save();
+
   show("app");
 
-// Open correct dashboard
-  S.page = profile.role === "admin" ? "admin" : "home";
+  if (profile.role === "admin") {
+    S.page = "admin";
+} 
+  else {
+    S.page = "home";
+}
 
-  save();
   render();
 
   toast("Welcome back, " + profile.name);
