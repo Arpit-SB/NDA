@@ -164,12 +164,14 @@ async function register(){
     return;
   }
 
-  const { data, error } =
-    await supabaseClient.auth.signUp({
-      email,
-      password
+  const { data, error } = await supabaseClient.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: window.location.origin + window.location.pathname,
+      data: { name }
+      }
     });
-
   if(error){
     toast(error.message);
     return;
