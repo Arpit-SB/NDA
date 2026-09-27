@@ -182,20 +182,7 @@ async function register(){
     return;
   }
 
-  const { error: profileError } =
-    await supabaseClient
-      .from("profiles")
-      .insert({
-        id:data.user.id,
-        name:name,
-        role:"student"
-      });
-
-  if(profileError){
-    toast(profileError.message);
-    return;
-  }
-
+  
   toast("Account created successfully.");
 
   showLogin();
