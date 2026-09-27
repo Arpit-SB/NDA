@@ -18,7 +18,18 @@ function btn(text,action,cls="ghost"){return `<button class="${cls}" data-action
 function splash(){show("splash");$("#enterBtn").onclick=()=>showAuth()}
 function show(id){["splash","auth","app"].forEach(x=>$("#"+x).classList.add("hidden"));$("#"+id).classList.remove("hidden")}
 function showAuth(){show("auth");setRole("student")}
+function clearAuthFields(){
+  $("#loginEmail").value = "";
+  $("#loginPassword").value = "";
+
+  $("#regName").value = "";
+  $("#regEmail").value = "";
+  $("#regPassword").value = "";
+  $("#regConfirm").value = "";
+}
 function showRegister(){
+  clearAuthFields();
+
   $("#loginForm").classList.add("hidden");
   $("#registerForm").classList.remove("hidden");
   $("#authToggle").classList.add("hidden");
@@ -27,6 +38,8 @@ function showRegister(){
 }
 
 function showLogin(){
+  clearAuthFields();
+
   $("#registerForm").classList.add("hidden");
   $("#loginForm").classList.remove("hidden");
   $("#authToggle").classList.remove("hidden");
