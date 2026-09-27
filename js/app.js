@@ -169,21 +169,18 @@ async function register(){
     password,
     options: {
       emailRedirectTo: window.location.origin + window.location.pathname,
-      data: { name }
+      data: {
+        name: name
       }
-    });
+    }
+  });
+
   if(error){
     toast(error.message);
     return;
   }
 
-  if(!data.user){
-    toast("Check your email to verify your account.");
-    return;
-  }
-
-  
-  toast("Account created successfully.");
+  toast("Account created. Check your email to verify your account.");
 
   showLogin();
 }
