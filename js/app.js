@@ -271,61 +271,155 @@ function resources(type){
 
   </div>`;
 }
-function lecturePlayer(id){
-  const lecture=S.db.lectures.find(x=>x.id===id);
+async function lecturePlayer(id){
+
+  const lecture=S.db.lectures.find(
+    x=>x.id===id
+  );
 
   if(!lecture){
-    return head(
-      "Lecture Not Found",
-      "VIDEO PLAYER",
-      btn("← LECTURES","resources:lectures")
-    )+
-    `<div class="card">
-      <div class="empty">This lecture is no longer available.</div>
-    </div>`;
+
+    $("#content").innerHTML=
+      head(
+        "Lecture Not Found",
+        "VIDEO PLAYER",
+        btn(
+          "← LECTURES",
+          "resources:lectures"
+        )
+      )+
+
+      `<div class="card">
+        <div class="empty">
+          This lecture is no longer available.
+        </div>
+      </div>`;
+
+    return;
   }
 
-  return head(
-    lecture.title,
-    "VIDEO LECTURE",
-    btn("← BACK TO LECTURES","resources:lectures")
-  )+
 
-  `<div class="video-page">
+  // Show player layout first
+  $("#content").innerHTML=
 
-    <div class="card video-player-card">
+    head(
+      lecture.title,
+      "VIDEO LECTURE",
+      btn(
+        "← BACK TO LECTURES",
+        "resources:lectures"
+      )
+    )+
 
-      <div class="video-wrapper">
+    `<div class="video-page">
 
-        <video
-          id="lectureVideo"
-          class="lecture-video"
-          controls
-          controlsList="nodownload"
-          preload="metadata"
+      <div class="card video-player-card">
+
+        <div class="video-wrapper">
+
+          <div class="video-loading">
+            LOADING VIDEO...
+          </div>
+
+        </div>
+
+        <div class="video-info">
+
+          <span class="badge">
+            ${esc(
+              lecture.subject ||
+              "LECTURE"
+            )}
+          </span>
+
+          <h2>
+            ${esc(lecture.title)}
+          </h2>
+
+          <p class="muted">
+            ${esc(
+              lecture.chapter || ""
+            )}
+            ${
+              lecture.duration
+                ? " • "+esc(
+                    lecture.duration
+                  )
+                : ""
+            }
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>`;
+
+
+  // Get temporary signed URL
+  try{
+
+    const {
+      data,
+      error
+    } = await supabaseClient
+      .storage
+      .from("nda-lectures")
+      .createSignedUrl(
+        lecture.storagePath,
+        3600
+      );
+
+    if(error){
+      throw error;
+    }
+
+
+    $(".video-wrapper").innerHTML=`
+
+      <video
+        id="lectureVideo"
+        class="lecture-video"
+        controls
+        playsinline
+        preload="metadata"
+      >
+
+        <source
+          src="${esc(data.signedUrl)}"
+          type="video/mp4"
         >
-          <source src="${esc(lecture.url)}" type="video/mp4">
-          Your browser does not support HTML5 video.
-        </video>
+
+        Your browser does not support
+        HTML5 video.
+
+      </video>
+
+    `;
+
+
+  }catch(error){
+
+    console.error(
+      "Video loading error:",
+      error
+    );
+
+    $(".video-wrapper").innerHTML=`
+
+      <div class="empty">
+
+        Unable to load video.
+
+        <br><br>
+
+        ${esc(error.message || "")}
 
       </div>
 
-      <div class="video-info">
-        <span class="badge">${esc(lecture.subject||"LECTURE")}</span>
-
-        <h2>${esc(lecture.title)}</h2>
-
-        <p class="muted">
-          ${esc(lecture.chapter||"")} 
-          ${lecture.duration ? " • "+esc(lecture.duration) : ""}
-        </p>
-      </div>
-
-    </div>
-
-  </div>`;
-}
-function practice(){
+    `;
+  }
+}function practice(){
   return head("Practice","QUESTION BANK")+
   `<div class="grid g3">
     ${S.db.questions
@@ -455,7 +549,53 @@ function adminContent(){
 }
 function field(id,label,placeholder,type="text"){return `<label class="field">${label}<input id="${id}" type="${type}" placeholder="${placeholder}"></label>`}
 function adminForm(){let t=S.adminType;
-if(t==="lecture")return `<div class="formGrid">${field("fTitle","Lecture title","Mechanics — Newton's Laws")}${field("fSubject","Subject","Physics")}${field("fChapter","Chapter","Mechanics")}${field("fUrl","Video URL","https://...")}<div class="wide upload"><label>Lecture file<input id="fFile" type="file" accept="video/*"></label></div><div class="wide">${btn("PUBLISH LECTURE","publish:lecture","primary")}</div></div>`;
+if(t==="lecture")return `
+<div class="formGrid">
+
+  ${field(
+    "fTitle",
+    "Lecture title",
+    "Mechanics — Newton's Laws"
+  )}
+
+  ${field(
+    "fSubject",
+    "Subject",
+    "Physics"
+  )}
+
+  ${field(
+    "fChapter",
+    "Chapter",
+    "Mechanics"
+  )}
+
+  <div class="wide upload">
+
+    <label>
+      Lecture video
+
+      <input
+        id="fFile"
+        type="file"
+        accept="video/*"
+      >
+
+    </label>
+
+  </div>
+
+  <div class="wide">
+
+    ${btn(
+      "PUBLISH LECTURE",
+      "publish:lecture",
+      "primary"
+    )}
+
+  </div>
+
+</div>`;
 if(t==="note"||t==="book")return `<div class="formGrid">${field("fTitle","Title",t==="book"?"NDA Book PDF":"Formula Sheet")}${field("fSubject","Subject","Physics")}${field("fType","Type",t==="book"?"PDF Book":"Formula Sheet")}${field("fUrl","File URL","https://...")}<div class="wide upload"><label>PDF/file<input id="fFile" type="file" accept=".pdf,.doc,.docx,.ppt,.pptx"></label></div><div class="wide">${btn("PUBLISH "+t.toUpperCase(),"publish:"+t,"primary")}</div></div>`;
 if(t==="test")return `<div class="formGrid">${field("fTitle","Test name","NDA Full Mock 01")}${field("fDuration","Duration","120","number")}<div class="wide">${field("fQuestions","Question IDs","q1,q2,q3,q4")}</div><div class="wide">${btn("PUBLISH TEST","publish:test","primary")}</div></div>`;
 if(t==="question")return `<div class="formGrid">${field("fTitle","Question","Enter question")}${field("fSubject","Subject ID","math")}${field("fChapter","Chapter ID","m1")}<div class="wide">${field("fOptions","Options","Option A, Option B, Option C, Option D")}</div>${field("fAnswer","Correct option 0-3","0","number")}${field("fExp","Explanation","Detailed explanation")}<div class="wide">${btn("ADD QUESTION","publish:question","primary")}</div></div>`;
@@ -468,12 +608,15 @@ if(a.startsWith("subject:")){S.page="subject";$("#content").innerHTML=subjectPag
 if(a.startsWith("chapter:")){go("practice");return}
 if(a.startsWith("resources:")){$("#content").innerHTML=resources(a.split(":")[1]);bind();return}
 if(a.startsWith("lecture:")){
+
   S.page="lecture";
-  $("#content").innerHTML=lecturePlayer(a.split(":")[1]);
-  bind();
+
+  lecturePlayer(
+    a.split(":")[1]
+  );
+
   return;
-}
-if(a.startsWith("question:")){$("#content").innerHTML=questionPage(a.split(":")[1]);bind();return}
+}if(a.startsWith("question:")){$("#content").innerHTML=questionPage(a.split(":")[1]);bind();return}
 if(a.startsWith("test:")){$("#content").innerHTML=testPage(a.split(":")[1]);bind();return}
 if(a.startsWith("check:")){
   check(a.split(":")[1]);
@@ -510,23 +653,182 @@ function removeStudent(id){
   toast("Student removed");
 }
 function submitTest(){let t=S.test,score=0;t.qs.forEach((q,i)=>{let x=document.querySelector(`input[name="t${i}"]:checked`);if(x&&+x.value===q.ans)score++;else if(x&&!S.mistakes.includes(q.id))S.mistakes.push(q.id)});S.results.unshift({test:t.t.name,score,total:t.qs.length,date:new Date().toISOString()});save();S.page="analytics";render();toast("Test submitted")}
-function publish(t){
-let id=t+"_"+Date.now(),v=id=>$("#"+id).value;
-if(t==="lecture")S.db.lectures.push({id,title:v("fTitle"),subject:v("fSubject"),chapter:v("fChapter"),duration:"Uploaded",url:v("fUrl")||"#",published:true});
-else if(t==="note"||t==="book")S.db[t==="note"?"notes":"books"].push({id,title:v("fTitle"),subject:v("fSubject"),type:v("fType"),url:v("fUrl")||"#",published:true});
-else if(t==="test")S.db.tests.push({id,name:v("fTitle"),type:"Admin Test",duration:+v("fDuration")||60,questions:v("fQuestions").split(",").map(x=>x.trim()).filter(Boolean)});
-else if(t==="question")S.db.questions.push({
-  id,
-  q:v("fTitle"),
-  subject:v("fSubject"),
-  chapter:v("fChapter"),
-  opts:v("fOptions").split(",").map(x=>x.trim()),
-  ans:+v("fAnswer")||0,
-  exp:v("fExp"),
-  published:true
-});
-else S.db.currentAffairs.unshift({id,date:v("fDate")||new Date().toISOString().slice(0,10),cat:v("fSubject"),title:v("fTitle"),text:v("fText")});
-save();render();toast("Published. Students can now see it.")}
+async function uploadLecture(file, fileName){
+
+  if(!file){
+    throw new Error("Please select a video file.");
+  }
+
+  const cleanName = fileName
+    .replace(/[^a-zA-Z0-9._-]/g, "_");
+
+  const filePath =
+    "lectures/" +
+    Date.now() +
+    "_" +
+    cleanName;
+
+  const { data, error } = await supabaseClient
+    .storage
+    .from("nda-lectures")
+    .upload(filePath, file, {
+      cacheControl: "3600",
+      contentType: file.type,
+      upsert: false
+    });
+
+  if(error){
+    console.error("Supabase upload error:", error);
+    throw error;
+  }
+
+  return data.path;
+}
+async function publish(t){
+
+  let id=t+"_"+Date.now();
+
+  const v=id=>{
+    const el=$("#"+id);
+    return el ? el.value : "";
+  };
+
+  // =========================
+  // LECTURE
+  // =========================
+  if(t==="lecture"){
+
+    const file=$("#fFile")?.files?.[0];
+
+    if(!file){
+      toast("Please select a video file.");
+      return;
+    }
+
+    if(!file.type.startsWith("video/")){
+      toast("Please select a valid video file.");
+      return;
+    }
+
+    try{
+
+      toast("Uploading video...");
+
+      const storagePath=await uploadLecture(
+        file,
+        file.name
+      );
+
+      S.db.lectures.push({
+        id,
+        title:v("fTitle"),
+        subject:v("fSubject"),
+        chapter:v("fChapter"),
+        duration:"Uploaded",
+        url:"",
+        storagePath:storagePath,
+        published:true
+      });
+
+      save();
+
+      render();
+
+      toast("Lecture uploaded successfully.");
+
+    }catch(error){
+
+      console.error(error);
+
+      toast(
+        "Upload failed: "+
+        (error.message || "Unknown error")
+      );
+    }
+
+    return;
+  }
+
+
+  // =========================
+  // NOTES / BOOKS
+  // =========================
+  if(t==="note"||t==="book"){
+
+    S.db[
+      t==="note" ? "notes" : "books"
+    ].push({
+      id,
+      title:v("fTitle"),
+      subject:v("fSubject"),
+      type:v("fType"),
+      url:v("fUrl")||"#",
+      published:true
+    });
+
+  }
+
+
+  // =========================
+  // TEST
+  // =========================
+  else if(t==="test"){
+
+    S.db.tests.push({
+      id,
+      name:v("fTitle"),
+      type:"Admin Test",
+      duration:+v("fDuration")||60,
+      questions:v("fQuestions")
+        .split(",")
+        .map(x=>x.trim())
+        .filter(Boolean)
+    });
+
+  }
+
+
+  // =========================
+  // QUESTION
+  // =========================
+  else if(t==="question"){
+
+    S.db.questions.push({
+      id,
+      q:v("fTitle"),
+      subject:v("fSubject"),
+      chapter:v("fChapter"),
+      opts:v("fOptions")
+        .split(",")
+        .map(x=>x.trim()),
+      ans:+v("fAnswer")||0,
+      exp:v("fExp"),
+      published:true
+    });
+
+  }
+
+
+  // =========================
+  // CURRENT AFFAIRS
+  // =========================
+  else{
+
+    S.db.currentAffairs.unshift({
+      id,
+      date:v("fDate") ||
+        new Date().toISOString().slice(0,10),
+      cat:v("fSubject"),
+      title:v("fTitle"),
+      text:v("fText")
+    });
+
+  }
+
+  save();
+  render();
+  toast("Published. Students can now see it.");
+}
 function search(){let q=prompt("Search NDA Command");if(!q)return;let s=q.toLowerCase(),hits=[...S.db.chapters.map(x=>x.name),...S.db.lectures.map(x=>x.title),...S.db.notes.map(x=>x.title),...S.db.books.map(x=>x.title)].filter(x=>x.toLowerCase().includes(s));alert(hits.length?hits.join("\n"):"No results")}
 document.addEventListener("DOMContentLoaded",()=>{setupAuth();setupShell();if(S.user){show("app");render()}else splash()})
 function togglePublish(parts){
