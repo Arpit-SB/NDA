@@ -221,7 +221,110 @@ function home(){let avg=Math.round(S.db.chapters.reduce((a,x)=>a+x.progress,0)/S
 <div class="section"><h2>Continue Learning</h2>${btn("VIEW ALL","study")}</div><div class="grid g4">${S.db.chapters.slice(0,4).map(c=>`<div class="card chapter"><span class="badge">${subject(c.subject)}</span><h3>${c.name}</h3><p>${c.items} practice items</p><div class="progress"><i style="width:${c.progress}%"></i></div><small>${c.progress}% complete</small></div>`).join("")}</div>`}
 function study(){return head("Study Library","KNOWLEDGE BASE")+`<div class="grid g4">${S.db.subjects.map(s=>`<div class="card chapter"><span class="badge">${s.code}</span><h3>${s.icon} ${s.name}</h3><p class="muted">${s.desc}</p>${btn("OPEN","subject:"+s.id)}</div>`).join("")}</div><div class="section"><h2>Resources</h2></div><div class="grid g3"><div class="card"><h3>Video Lectures</h3><p class="muted">Admin-published lectures.</p>${btn("BROWSE","resources:lectures")}</div><div class="card"><h3>Notes & Formula</h3><p class="muted">Revision material.</p>${btn("BROWSE","resources:notes")}</div><div class="card"><h3>Books / PDFs</h3><p class="muted">Admin-published PDFs.</p>${btn("BROWSE","resources:books")}</div></div>`}
 function subjectPage(id){let s=S.db.subjects.find(x=>x.id===id),cs=S.db.chapters.filter(x=>x.subject===id);return head(s.name,"STUDY • CHAPTERS",btn("← BACK","study"))+`<div class="grid g3">${cs.map(c=>`<div class="card chapter"><span class="badge">${c.items} ITEMS</span><h3>${c.name}</h3><p class="muted">Lectures • Notes • Practice • PYQs • Test</p><div class="progress"><i style="width:${c.progress}%"></i></div>${btn("OPEN","chapter:"+c.id)}</div>`).join("")||`<div class="empty">No chapters published.</div>`}</div>`}
-function resources(type){let a=S.db[type].filter(x=>x.published);return head(type==="lectures"?"Lecture Library":type==="notes"?"Notes Library":"Book Library","RESOURCE LIBRARY",btn("← STUDY","study"))+`<div class="grid g3">${a.map(x=>`<div class="card"><span class="badge">${esc(x.type||x.subject)}</span><h3>${esc(x.title)}</h3><p class="muted">${esc(x.subject||"")} ${x.duration?"• "+x.duration:""}</p><a class="primary" href="${esc(x.url||"#")}" target="_blank">OPEN →</a></div>`).join("")||`<div class="empty">Nothing published yet.</div>`}</div>`}
+function resources(type){
+  let a=S.db[type].filter(x=>x.published);
+
+  return head(
+    type==="lectures"
+      ?"Lecture Library"
+      :type==="notes"
+      ?"Notes Library"
+      :"Book Library",
+    "RESOURCE LIBRARY",
+    btn("← STUDY","study")
+  )+
+
+  `<div class="grid g3">
+
+    ${
+      a.map(x=>`
+
+        <div class="card">
+
+          <span class="badge">
+            ${esc(x.type||x.subject)}
+          </span>
+
+          <h3>${esc(x.title)}</h3>
+
+          <p class="muted">
+            ${esc(x.subject||"")}
+            ${x.duration ? " • "+esc(x.duration) : ""}
+          </p>
+
+          ${
+            type==="lectures"
+              ? btn("WATCH NOW","lecture:"+x.id,"primary")
+              : `<a class="primary"
+                    href="${esc(x.url||"#")}"
+                    target="_blank">
+                    OPEN →
+                 </a>`
+          }
+
+        </div>
+
+      `).join("")
+      ||
+      `<div class="empty">Nothing published yet.</div>`
+    }
+
+  </div>`;
+}
+function lecturePlayer(id){
+  const lecture=S.db.lectures.find(x=>x.id===id);
+
+  if(!lecture){
+    return head(
+      "Lecture Not Found",
+      "VIDEO PLAYER",
+      btn("← LECTURES","resources:lectures")
+    )+
+    `<div class="card">
+      <div class="empty">This lecture is no longer available.</div>
+    </div>`;
+  }
+
+  return head(
+    lecture.title,
+    "VIDEO LECTURE",
+    btn("← BACK TO LECTURES","resources:lectures")
+  )+
+
+  `<div class="video-page">
+
+    <div class="card video-player-card">
+
+      <div class="video-wrapper">
+
+        <video
+          id="lectureVideo"
+          class="lecture-video"
+          controls
+          controlsList="nodownload"
+          preload="metadata"
+        >
+          <source src="${esc(lecture.url)}" type="video/mp4">
+          Your browser does not support HTML5 video.
+        </video>
+
+      </div>
+
+      <div class="video-info">
+        <span class="badge">${esc(lecture.subject||"LECTURE")}</span>
+
+        <h2>${esc(lecture.title)}</h2>
+
+        <p class="muted">
+          ${esc(lecture.chapter||"")} 
+          ${lecture.duration ? " • "+esc(lecture.duration) : ""}
+        </p>
+      </div>
+
+    </div>
+
+  </div>`;
+}
 function practice(){
   return head("Practice","QUESTION BANK")+
   `<div class="grid g3">
@@ -364,6 +467,12 @@ if(["home","study","practice","tests","revision","current","planner","analytics"
 if(a.startsWith("subject:")){S.page="subject";$("#content").innerHTML=subjectPage(a.split(":")[1]);bind();return}
 if(a.startsWith("chapter:")){go("practice");return}
 if(a.startsWith("resources:")){$("#content").innerHTML=resources(a.split(":")[1]);bind();return}
+if(a.startsWith("lecture:")){
+  S.page="lecture";
+  $("#content").innerHTML=lecturePlayer(a.split(":")[1]);
+  bind();
+  return;
+}
 if(a.startsWith("question:")){$("#content").innerHTML=questionPage(a.split(":")[1]);bind();return}
 if(a.startsWith("test:")){$("#content").innerHTML=testPage(a.split(":")[1]);bind();return}
 if(a.startsWith("check:")){
