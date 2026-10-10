@@ -508,9 +508,10 @@ function adminContent(){
         ...S.db.lectures.map(x=>["LECTURE",x,x.title]),
         ...S.db.notes.map(x=>["NOTE",x,x.title]),
         ...S.db.books.map(x=>["BOOK",x,x.title]),
-        ...S.db.questions.map(x=>["QUESTION",x,x.q])
+        ...S.db.tests.map(x=>["TEST",x,x.title]),
+        ...S.db.questions.map(x=>["QUESTION",x,x.q]),
+        ...S.db.currentAffairs.map(x=>["CURRENT AFFAIRS",x,x.title])
       ].map(([type,item,title])=>`
-
         <tr>
           <td>${type}</td>
 
@@ -535,6 +536,44 @@ function adminContent(){
                   "toggle-publish:"+type+":"+item.id,
                   "danger"
                 )
+          }
+
+          ${
+            type==="LECTURE"
+            ? btn(
+                "DELETE",
+                "deleteLecture:"+item.id,
+                "danger"
+              )
+            : type==="NOTE"
+            ? btn(
+                "DELETE",
+                "deleteContent:notes:"+item.id,
+                "danger"
+              )
+            : type==="BOOK"
+            ? btn(
+                "DELETE",
+                "deleteContent:books:"+item.id,
+                "danger"
+              )
+            : type==="TEST"
+            ? btn(
+                "DELETE",
+                "deleteContent:tests:"+item.id,
+                "danger"
+              )
+            : type==="CURRENT AFFAIRS"
+            ? btn(
+                "DELETE",
+                "deleteContent:currentAffairs:"+item.id,
+                "danger"
+              )
+            : btn(
+                "DELETE",
+                "deleteContent:questions:"+item.id,
+                "danger"
+              )
             }
           </td>
         </tr>
@@ -607,6 +646,25 @@ if(["home","study","practice","tests","revision","current","planner","analytics"
 if(a.startsWith("subject:")){S.page="subject";$("#content").innerHTML=subjectPage(a.split(":")[1]);bind();return}
 if(a.startsWith("chapter:")){go("practice");return}
 if(a.startsWith("resources:")){$("#content").innerHTML=resources(a.split(":")[1]);bind();return}
+if(a.startsWith("deleteLecture:")){
+
+  deleteLecture(
+    a.split(":")[1]
+  );
+
+  return;
+}
+if(a.startsWith("deleteContent:")){
+
+  const parts = a.split(":");
+
+  deleteContent(
+    parts[1],
+    parts[2]
+  );
+
+  return;
+}
 if(a.startsWith("lecture:")){
 
   S.page="lecture";
@@ -616,7 +674,8 @@ if(a.startsWith("lecture:")){
   );
 
   return;
-}if(a.startsWith("question:")){$("#content").innerHTML=questionPage(a.split(":")[1]);bind();return}
+}
+if(a.startsWith("question:")){$("#content").innerHTML=questionPage(a.split(":")[1]);bind();return}
 if(a.startsWith("test:")){$("#content").innerHTML=testPage(a.split(":")[1]);bind();return}
 if(a.startsWith("check:")){
   check(a.split(":")[1]);
@@ -683,6 +742,81 @@ async function uploadLecture(file, fileName){
   }
 
   return data.path;
+}
+async function deleteLecture(id){
+
+  const lecture = S.db.lectures.find(x => x.id === id);
+
+  if(!lecture){
+    toast("Lecture not found.");
+    return;
+  }
+
+  if(!confirm(`Delete "${lecture.title}" permanently?`)){
+    return;
+  }
+
+  try{
+
+    // Delete actual video from Supabase Storage
+    if(lecture.storagePath){
+
+      const { error } = await supabaseClient
+        .storage
+        .from("nda-lectures")
+        .remove([lecture.storagePath]);
+
+      if(error){
+        throw error;
+      }
+    }
+
+    // Remove lecture record
+    S.db.lectures =
+      S.db.lectures.filter(x => x.id !== id);
+
+    save();
+    render();
+
+    toast("Lecture deleted successfully.");
+
+  }catch(error){
+
+    console.error("Delete lecture error:", error);
+
+    toast(
+      "Delete failed: " +
+      (error.message || "Unknown error")
+    );
+  }
+}
+function deleteContent(type, id){
+
+  const list = S.db[type];
+
+  if(!list){
+    toast("Content not found.");
+    return;
+  }
+
+  const item = list.find(x => x.id === id);
+
+  if(!item){
+    toast("Content not found.");
+    return;
+  }
+
+  if(!confirm(`Delete "${item.title || item.name || "this content"}"?`)){
+    return;
+  }
+
+  S.db[type] =
+    list.filter(x => x.id !== id);
+
+  save();
+  render();
+
+  toast("Content deleted successfully.");
 }
 async function publish(t){
 
