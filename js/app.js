@@ -212,7 +212,7 @@ function setupShell(){$("#menuBtn").onclick=openMenu;$("#closeMenu").onclick=clo
 
 function render(){
 if(!S.user)return; shell();
-let fn={home:home,study:study,practice:practice,tests:tests,revision:revision,current:current,planner:planner,analytics:analytics,ssb:ssb,profile:profile,admin:admin,"admin-content":adminContent,"admin-users":adminUsers}[S.page];
+let fn={home:home,study:study,practice:practice,tests:tests,revision:revision,current:current,planner:planner,analytics:analytics,ssb:ssb,profile:profile,lecture:lecturePlayer,admin:admin,"admin-content":adminContent,"admin-users":adminUsers}[S.page];
 if(fn)$("#content").innerHTML=fn();bind();
 }
 function home(){let avg=Math.round(S.db.chapters.reduce((a,x)=>a+x.progress,0)/S.db.chapters.length);return head("Command Dashboard","STUDENT • PREPARATION STATUS")+`
