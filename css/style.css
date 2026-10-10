@@ -75,3 +75,40 @@
   line-height: 1;
   z-index: 5;
 }
+.video-page{
+  max-width:1100px;
+  margin:0 auto;
+}
+
+.video-player-card{
+  padding:0;
+  overflow:hidden;
+}
+
+.video-wrapper{
+  width:100%;
+  background:#000;
+  aspect-ratio:16/9;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.lecture-video{
+  width:100%;
+  height:100%;
+  display:block;
+  background:#000;
+}
+
+.video-info{
+  padding:24px;
+}
+
+.video-info h2{
+  margin:12px 0 8px;
+}
+
+.video-info .muted{
+  margin:0;
+}
