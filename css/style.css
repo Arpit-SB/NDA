@@ -112,3 +112,11 @@
 .video-info .muted{
   margin:0;
 }
+.video-loading{
+  color:#fff;
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:1px;
+  text-align:center;
+  padding:40px;
+}
